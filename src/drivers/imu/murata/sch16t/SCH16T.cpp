@@ -104,14 +104,21 @@ int SCH16T::probe()
 	char serial_str[14];
 	snprintf(serial_str, 14, "%05d%01X%04X", sn_id2, sn_id1 & 0x000F, sn_id3);
 
+	PX4_INFO("COMP_ID:\t 0x%0x", comp_id);
+	PX4_INFO("ASIC_ID:\t 0x%0x", asic_id);
+
 	// Determine chip version based on COMP_ID and ASIC_ID
+
 	if (asic_id == 0x21 && comp_id == 0x23) {
 		_detected_version = ChipVersion::REV_1;
-	} else if (asic_id == 0x20 && comp_id == 0x17) {
+	} else if ((asic_id == 0x20 && comp_id == 0x17) || (asic_id == 0x21 && comp_id == 0x24)) {
+		// ASIC_ID = 0x20, COMP_ID = 0x17 is a B13 variant of REV_2
+		// ASIC_ID = 0x21, COMP_ID = 0x24 is a B10 variant of REV_2
 		_detected_version = ChipVersion::REV_2;
 	} else {
 		_detected_version = ChipVersion::UNKNOWN;
 		PX4_ERR("Unsupported COMP_ID and ASIC_ID combination");
+		PX4_ERR("COMP_ID: 0x%04X, ASIC_ID: 0x%04X", comp_id, asic_id);
 		return PX4_ERROR;
 	}
 
